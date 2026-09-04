@@ -12,13 +12,17 @@ import "maplibre-gl/dist/maplibre-gl.css";
 // scripts/copy-maplibre-worker.mjs for why it can't just be bundled.
 setWorkerUrl("/maplibre-gl/maplibre-gl-worker.mjs");
 
-// Ottawa, ON
+// Ottawa, ON. Non-zero pitch/bearing just so it's visually obvious on load
+// that the 3D camera is doing something, ahead of any building data existing
+// to look at. Pitch/bearing are also draggable at runtime by default
+// (right-click-drag, or ctrl-drag, or two-finger drag on trackpad/touch) —
+// nothing extra needed to enable that interaction.
 const INITIAL_VIEW_STATE = {
   longitude: -75.6972,
   latitude: 45.4215,
   zoom: 11,
-  pitch: 0,
-  bearing: 0,
+  pitch: 60,
+  bearing: -20,
 };
 
 // Free demo vector style, no API key required. Swap for a MapTiler/Stadia/etc.

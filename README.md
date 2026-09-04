@@ -20,6 +20,11 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
+## Map tile data
+
+The map's basemap tiles are a local file that isn't checked into git. See
+[docs/map-tiles.md](docs/map-tiles.md) for how to fetch/update it.
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:
