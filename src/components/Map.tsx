@@ -3,6 +3,7 @@
 import { Map as MapLibreMap } from "react-map-gl/maplibre";
 import { addProtocol, setWorkerUrl } from "maplibre-gl";
 import { Protocol } from "pmtiles";
+import { GRAYSCALE, layers } from "@protomaps/basemaps";
 import "maplibre-gl/dist/maplibre-gl.css";
 
 // maplibre-gl locates its own tile-parsing worker relative to its internal
@@ -31,26 +32,22 @@ const INITIAL_VIEW_STATE = {
   bearing: -20,
 };
 
-// Deliberately bare-bones proof-of-concept style: just enough layers to
-// confirm the local pmtiles archive is actually being read and rendered,
-// before layering a real theme (protomaps-themes-base) on top of it. Layer
-// names ("earth", "water", "roads", ...) match the vector_layers reported by
-// `pmtiles show --metadata public/tiles/ottawa.pmtiles` — see
-// docs/map-tiles.md.
+// @protomaps/basemaps' GRAYSCALE flavor generates the full set of
+// fill/line/background layers matching the minitokyo3d-style greyscale look
+// (source-layer names — "earth", "water", "roads", ... — line up with the
+// vector_layers reported by `pmtiles show --metadata
+// public/tiles/ottawa.pmtiles`; see docs/map-tiles.md). Deliberately no
+// labels yet — that needs a glyphs (font) source, which is its own step.
+const SOURCE_NAME = "basemap";
 const MAP_STYLE = {
   version: 8 as const,
   sources: {
-    basemap: {
+    [SOURCE_NAME]: {
       type: "vector" as const,
       url: "pmtiles:///tiles/ottawa.pmtiles",
     },
   },
-  layers: [
-    { id: "background", type: "background" as const, paint: { "background-color": "#f2f2f2" } },
-    { id: "earth", type: "fill" as const, source: "basemap", "source-layer": "earth", paint: { "fill-color": "#e0e0e0" } },
-    { id: "water", type: "fill" as const, source: "basemap", "source-layer": "water", paint: { "fill-color": "#a0c8f0" } },
-    { id: "roads", type: "line" as const, source: "basemap", "source-layer": "roads", paint: { "line-color": "#999999", "line-width": 1 } },
-  ],
+  layers: layers(SOURCE_NAME, GRAYSCALE),
 };
 
 export default function Map() {
