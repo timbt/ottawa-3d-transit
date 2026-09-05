@@ -30,6 +30,9 @@ importers:
         specifier: ^8.1.3
         version: 8.1.3(maplibre-gl@6.7.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
     devDependencies:
+      '@maplibre/maplibre-gl-style-spec':
+        specifier: ^26.4.1
+        version: 26.4.1
       '@tailwindcss/postcss':
         specifier: ^4
         version: 4.3.3

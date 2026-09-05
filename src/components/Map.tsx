@@ -4,6 +4,11 @@ import { Map as MapLibreMap } from "react-map-gl/maplibre";
 import { addProtocol, setWorkerUrl } from "maplibre-gl";
 import { Protocol } from "pmtiles";
 import { GRAYSCALE, layers } from "@protomaps/basemaps";
+import type {
+  ExpressionSpecification,
+  FillExtrusionLayerSpecification,
+  LayerSpecification,
+} from "@maplibre/maplibre-gl-style-spec";
 import "maplibre-gl/dist/maplibre-gl.css";
 
 // maplibre-gl locates its own tile-parsing worker relative to its internal
@@ -27,7 +32,7 @@ addProtocol("pmtiles", new Protocol().tile);
 const INITIAL_VIEW_STATE = {
   longitude: -75.6972,
   latitude: 45.4215,
-  zoom: 11,
+  zoom: 15,
   pitch: 60,
   bearing: -20,
 };
@@ -39,6 +44,17 @@ const INITIAL_VIEW_STATE = {
 // public/tiles/ottawa.pmtiles`; see docs/map-tiles.md). Deliberately no
 // labels yet — that needs a glyphs (font) source, which is its own step.
 const SOURCE_NAME = "basemap";
+
+// OSM-tagged building height in meters, from the "buildings" source-layer
+// (see docs — decoded via a scratch MVT inspection, not every feature has
+// one). Falls back to a flat 6m (~2 storeys) guess where it's missing,
+// rather than leaving those buildings invisible at height 0.
+const BUILDING_HEIGHT: ExpressionSpecification = ["coalesce", ["get", "height"], 6];
+
+// Start from the theme's own layer set, then swap its flat, 50%-opacity
+// "buildings" fill for a fill-extrusion — reusing the theme's own building
+// color (GRAYSCALE.buildings) rather than duplicating it, and leaving
+// everything else the theme draws (roads, water, boundaries, ...) untouched.
 const MAP_STYLE = {
   version: 8 as const,
   sources: {
@@ -47,7 +63,22 @@ const MAP_STYLE = {
       url: "pmtiles:///tiles/ottawa.pmtiles",
     },
   },
-  layers: layers(SOURCE_NAME, GRAYSCALE),
+  layers: layers(SOURCE_NAME, GRAYSCALE).map((layer): LayerSpecification => {
+    if (layer.id !== "buildings" || layer.type !== "fill") return layer;
+    const extrusion: FillExtrusionLayerSpecification = {
+      id: layer.id,
+      type: "fill-extrusion",
+      source: layer.source,
+      "source-layer": layer["source-layer"],
+      filter: layer.filter,
+      paint: {
+        "fill-extrusion-color": GRAYSCALE.buildings,
+        "fill-extrusion-height": BUILDING_HEIGHT,
+        "fill-extrusion-opacity": 0.8,
+      },
+    };
+    return extrusion;
+  }),
 };
 
 export default function Map() {
