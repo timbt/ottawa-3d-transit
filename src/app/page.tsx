@@ -1,9 +1,9 @@
-import Map from "@/components/Map";
+import MapView from "@/components/MapView";
 
 export default function Home() {
   return (
     <div className="h-dvh w-full">
-      <Map />
+      <MapView />
     </div>
   );
 }

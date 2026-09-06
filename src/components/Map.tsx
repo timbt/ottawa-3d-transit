@@ -1,6 +1,7 @@
 "use client";
 
-import { Map as MapLibreMap } from "react-map-gl/maplibre";
+import type { Ref } from "react";
+import { Map as MapLibreMap, type MapRef } from "react-map-gl/maplibre";
 import { addProtocol, setWorkerUrl } from "maplibre-gl";
 import { Protocol } from "pmtiles";
 import { GRAYSCALE, layers } from "@protomaps/basemaps";
@@ -29,7 +30,7 @@ addProtocol("pmtiles", new Protocol().tile);
 // to look at. Pitch/bearing are also draggable at runtime by default
 // (right-click-drag, or ctrl-drag, or two-finger drag on trackpad/touch) —
 // nothing extra needed to enable that interaction.
-const INITIAL_VIEW_STATE = {
+export const DEFAULT_VIEW_STATE = {
   longitude: -75.6972,
   latitude: 45.4215,
   zoom: 15,
@@ -81,10 +82,11 @@ const MAP_STYLE = {
   }),
 };
 
-export default function Map() {
+export default function Map({ ref }: { ref?: Ref<MapRef> }) {
   return (
     <MapLibreMap
-      initialViewState={INITIAL_VIEW_STATE}
+      ref={ref}
+      initialViewState={DEFAULT_VIEW_STATE}
       mapStyle={MAP_STYLE}
       style={{ width: "100%", height: "100%" }}
     />
