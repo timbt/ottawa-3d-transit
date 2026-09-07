@@ -12,6 +12,10 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Vendored/generated, not our source — see scripts/copy-maplibre-worker.mjs
+    // and scripts/fetch-map-tiles.sh.
+    "public/maplibre-gl/**",
+    "public/tiles/**",
   ]),
 ]);
 

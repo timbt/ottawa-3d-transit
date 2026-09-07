@@ -1,0 +1,29 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: pnpm/setup@v2
+        with:
+          runtime: node@24
+          cache: true
+
+      - run: pnpm install --frozen-lockfile
+
+      - run: pnpm lint
+
+      - run: pnpm typecheck
+
+      # No R2/tile env vars on purpose — Map.tsx falls back to a local path
+      # when NEXT_PUBLIC_TILES_BASE_URL is unset, and the build doesn't need
+      # the actual tile file to exist (it's a runtime fetch URL, not a
+      # bundled asset). Verified locally that the build succeeds either way.
+      - run: pnpm build
