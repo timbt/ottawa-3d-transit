@@ -22,6 +22,8 @@ jobs:
 
       - run: pnpm typecheck
 
+      - run: pnpm test
+
       # No R2/tile env vars on purpose — Map.tsx falls back to a local path
       # when NEXT_PUBLIC_TILES_BASE_URL is unset, and the build doesn't need
       # the actual tile file to exist (it's a runtime fetch URL, not a

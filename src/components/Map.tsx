@@ -5,11 +5,7 @@ import { Map as MapLibreMap, type MapRef } from "react-map-gl/maplibre";
 import { addProtocol, setWorkerUrl } from "maplibre-gl";
 import { Protocol } from "pmtiles";
 import { GRAYSCALE, layers } from "@protomaps/basemaps";
-import type {
-  ExpressionSpecification,
-  FillExtrusionLayerSpecification,
-  LayerSpecification,
-} from "@maplibre/maplibre-gl-style-spec";
+import { resolveTilesUrl, toBuildingExtrusion } from "@/lib/map-style";
 import "maplibre-gl/dist/maplibre-gl.css";
 
 // maplibre-gl locates its own tile-parsing worker relative to its internal
@@ -46,24 +42,10 @@ export const DEFAULT_VIEW_STATE = {
 // labels yet — that needs a glyphs (font) source, which is its own step.
 const SOURCE_NAME = "basemap";
 
-// Cloudflare R2 (see docs/map-tiles.md) is the source of truth once
-// NEXT_PUBLIC_TILES_BASE_URL is set (production, or a dev machine that's
-// gone through the R2 setup). Falls back to the file scripts/fetch-map-tiles.sh
-// writes locally otherwise, so a fresh clone can still run the app with just
-// that script and no cloud credentials at all.
-const TILES_URL = process.env.NEXT_PUBLIC_TILES_BASE_URL
-  ? `${process.env.NEXT_PUBLIC_TILES_BASE_URL}/ottawa.pmtiles`
-  : "/tiles/ottawa.pmtiles";
-
-// OSM-tagged building height in meters, from the "buildings" source-layer
-// (see docs — decoded via a scratch MVT inspection, not every feature has
-// one). Falls back to a flat 6m (~2 storeys) guess where it's missing,
-// rather than leaving those buildings invisible at height 0.
-const BUILDING_HEIGHT: ExpressionSpecification = ["coalesce", ["get", "height"], 6];
+const TILES_URL = resolveTilesUrl(process.env.NEXT_PUBLIC_TILES_BASE_URL);
 
 // Start from the theme's own layer set, then swap its flat, 50%-opacity
-// "buildings" fill for a fill-extrusion — reusing the theme's own building
-// color (GRAYSCALE.buildings) rather than duplicating it, and leaving
+// "buildings" fill for a fill-extrusion (see src/lib/map-style.ts), leaving
 // everything else the theme draws (roads, water, boundaries, ...) untouched.
 const MAP_STYLE = {
   version: 8 as const,
@@ -73,22 +55,7 @@ const MAP_STYLE = {
       url: `pmtiles://${TILES_URL}`,
     },
   },
-  layers: layers(SOURCE_NAME, GRAYSCALE).map((layer): LayerSpecification => {
-    if (layer.id !== "buildings" || layer.type !== "fill") return layer;
-    const extrusion: FillExtrusionLayerSpecification = {
-      id: layer.id,
-      type: "fill-extrusion",
-      source: layer.source,
-      "source-layer": layer["source-layer"],
-      filter: layer.filter,
-      paint: {
-        "fill-extrusion-color": GRAYSCALE.buildings,
-        "fill-extrusion-height": BUILDING_HEIGHT,
-        "fill-extrusion-opacity": 0.8,
-      },
-    };
-    return extrusion;
-  }),
+  layers: layers(SOURCE_NAME, GRAYSCALE).map((layer) => toBuildingExtrusion(layer, GRAYSCALE.buildings)),
 };
 
 export default function Map({ ref }: { ref?: Ref<MapRef> }) {
