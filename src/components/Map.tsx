@@ -58,6 +58,14 @@ const MAP_STYLE = {
   layers: layers(SOURCE_NAME, GRAYSCALE).map((layer) => toBuildingExtrusion(layer, GRAYSCALE.buildings)),
 };
 
+declare global {
+  interface Window {
+    // Test-observability hook only — see e2e/map.spec.ts. Not read by any
+    // app code; safe to ignore outside of testing.
+    __mapLoaded?: boolean;
+  }
+}
+
 export default function Map({ ref }: { ref?: Ref<MapRef> }) {
   return (
     <MapLibreMap
@@ -65,6 +73,9 @@ export default function Map({ ref }: { ref?: Ref<MapRef> }) {
       initialViewState={DEFAULT_VIEW_STATE}
       mapStyle={MAP_STYLE}
       style={{ width: "100%", height: "100%" }}
+      onLoad={() => {
+        window.__mapLoaded = true;
+      }}
     />
   );
 }

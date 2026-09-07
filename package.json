@@ -10,6 +10,7 @@
     "typecheck": "next typegen && tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:e2e": "playwright test",
     "postinstall": "node scripts/copy-maplibre-worker.mjs"
   },
   "dependencies": {
@@ -24,6 +25,7 @@
   "devDependencies": {
     "@aws-sdk/client-s3": "^3.1127.0",
     "@maplibre/maplibre-gl-style-spec": "^26.4.1",
+    "@playwright/test": "^1.63.0",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^24.13.3",
     "@types/react": "^19",

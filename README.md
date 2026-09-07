@@ -25,6 +25,19 @@ This project uses [`next/font`](https://nextjs.org/docs/app/building-your-applic
 The map's basemap tiles are a local file that isn't checked into git. See
 [docs/map-tiles.md](docs/map-tiles.md) for how to fetch/update it.
 
+## Testing
+
+```bash
+pnpm typecheck   # tsc, plus generates Next's route-aware ambient types first
+pnpm lint
+pnpm test        # unit tests (Vitest) — pure logic in src/lib/**
+pnpm test:e2e    # smoke test (Playwright) — loads the real app against a
+                 # tiny committed tile fixture (e2e/fixtures/), not live
+                 # Ottawa data or R2; see e2e/map.spec.ts
+```
+
+`pnpm test:e2e` needs Chromium installed once: `npx playwright install --with-deps chromium`.
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:

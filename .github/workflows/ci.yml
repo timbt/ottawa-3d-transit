@@ -29,3 +29,9 @@ jobs:
       # the actual tile file to exist (it's a runtime fetch URL, not a
       # bundled asset). Verified locally that the build succeeds either way.
       - run: pnpm build
+
+      - run: npx playwright install --with-deps chromium
+
+      # playwright.config.ts's webServer does its own build+start against
+      # the e2e/fixtures/ tile fixture, separate from the plain build above.
+      - run: pnpm test:e2e
