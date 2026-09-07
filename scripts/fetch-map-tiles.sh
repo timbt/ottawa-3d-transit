@@ -52,3 +52,14 @@ pmtiles extract "$source_url" "$out_file" \
 
 echo "wrote $out_file"
 pmtiles show "$out_file"
+
+# Push it to the R2 bucket the app actually serves tiles from (see
+# docs/map-tiles.md) — skipped, not failed, if R2 credentials aren't set up
+# yet, since the local file alone is still useful for inspection.
+env_file="$root/.env.local"
+if [ -f "$env_file" ]; then
+  echo "uploading to R2..."
+  node --env-file="$env_file" "$root/scripts/upload-map-tiles.mjs"
+else
+  echo "skipping R2 upload: no .env.local found (see .env.example)"
+fi

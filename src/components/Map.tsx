@@ -46,6 +46,15 @@ export const DEFAULT_VIEW_STATE = {
 // labels yet — that needs a glyphs (font) source, which is its own step.
 const SOURCE_NAME = "basemap";
 
+// Cloudflare R2 (see docs/map-tiles.md) is the source of truth once
+// NEXT_PUBLIC_TILES_BASE_URL is set (production, or a dev machine that's
+// gone through the R2 setup). Falls back to the file scripts/fetch-map-tiles.sh
+// writes locally otherwise, so a fresh clone can still run the app with just
+// that script and no cloud credentials at all.
+const TILES_URL = process.env.NEXT_PUBLIC_TILES_BASE_URL
+  ? `${process.env.NEXT_PUBLIC_TILES_BASE_URL}/ottawa.pmtiles`
+  : "/tiles/ottawa.pmtiles";
+
 // OSM-tagged building height in meters, from the "buildings" source-layer
 // (see docs — decoded via a scratch MVT inspection, not every feature has
 // one). Falls back to a flat 6m (~2 storeys) guess where it's missing,
@@ -61,7 +70,7 @@ const MAP_STYLE = {
   sources: {
     [SOURCE_NAME]: {
       type: "vector" as const,
-      url: "pmtiles:///tiles/ottawa.pmtiles",
+      url: `pmtiles://${TILES_URL}`,
     },
   },
   layers: layers(SOURCE_NAME, GRAYSCALE).map((layer): LayerSpecification => {
