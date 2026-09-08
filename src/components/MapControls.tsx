@@ -28,6 +28,7 @@ export default function MapControls({ mapRef }: { mapRef: RefObject<MapRef | nul
         title="Recenter on downtown Ottawa"
         className="rounded-md bg-white/90 p-2 text-zinc-800 shadow-md backdrop-blur transition-colors hover:bg-white"
       >
+        {/* LocateFixed: closest lucide-react match to a "recenter" glyph */}
         <LocateFixed size={20} aria-hidden="true" />
       </button>
     </div>
