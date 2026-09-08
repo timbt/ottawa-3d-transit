@@ -25,9 +25,24 @@ export default function MapControls({ mapRef }: { mapRef: RefObject<MapRef | nul
         onClick={recenter}
         aria-label="Recenter map on downtown Ottawa"
         title="Recenter on downtown Ottawa"
-        className="rounded-md bg-white/90 px-3 py-2 text-sm font-medium text-zinc-800 shadow-md backdrop-blur transition-colors hover:bg-white"
+        className="rounded-md bg-white/90 p-2 text-zinc-800 shadow-md backdrop-blur transition-colors hover:bg-white"
       >
-        Recenter
+        <svg
+          viewBox="0 0 24 24"
+          width="20"
+          height="20"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          aria-hidden="true"
+        >
+          <circle cx="12" cy="12" r="3" fill="currentColor" stroke="none" />
+          <line x1="12" y1="2" x2="12" y2="6" />
+          <line x1="12" y1="18" x2="12" y2="22" />
+          <line x1="2" y1="12" x2="6" y2="12" />
+          <line x1="18" y1="12" x2="22" y2="12" />
+        </svg>
       </button>
     </div>
   );
