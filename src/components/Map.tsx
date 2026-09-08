@@ -2,7 +2,7 @@
 
 import type { Ref } from "react";
 import { Map as MapLibreMap, type MapRef } from "react-map-gl/maplibre";
-import { addProtocol, setWorkerUrl } from "maplibre-gl";
+import { addProtocol, setWorkerUrl, type Map as MapLibreGlMap } from "maplibre-gl";
 import { Protocol } from "pmtiles";
 import { GRAYSCALE, layers } from "@protomaps/basemaps";
 import { resolveTilesUrl, toBuildingExtrusion } from "@/lib/map-style";
@@ -60,9 +60,13 @@ const MAP_STYLE = {
 
 declare global {
   interface Window {
-    // Test-observability hook only — see e2e/map.spec.ts. Not read by any
-    // app code; safe to ignore outside of testing.
+    // Test-observability hooks only — see e2e/*.spec.ts. Not read by any app
+    // code; safe to ignore outside of testing.
     __mapLoaded?: boolean;
+    // The underlying maplibre-gl Map instance, so e2e tests can drive the
+    // camera (jumpTo) and read it back (getCenter/getZoom/...) without a
+    // bespoke API of their own.
+    __map?: MapLibreGlMap;
   }
 }
 
@@ -73,8 +77,9 @@ export default function Map({ ref }: { ref?: Ref<MapRef> }) {
       initialViewState={DEFAULT_VIEW_STATE}
       mapStyle={MAP_STYLE}
       style={{ width: "100%", height: "100%" }}
-      onLoad={() => {
+      onLoad={(e) => {
         window.__mapLoaded = true;
+        window.__map = e.target;
       }}
     />
   );
