@@ -28,6 +28,7 @@
     "@maplibre/maplibre-gl-style-spec": "^26.4.1",
     "@playwright/test": "^1.63.0",
     "@tailwindcss/postcss": "^4",
+    "@types/geojson": "^7946.0.16",
     "@types/node": "^24.13.3",
     "@types/react": "^19",
     "@types/react-dom": "^19",
