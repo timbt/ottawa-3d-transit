@@ -6,6 +6,7 @@ import { addProtocol, setWorkerUrl, type Map as MapLibreGlMap } from "maplibre-g
 import { Protocol } from "pmtiles";
 import { GRAYSCALE, layers } from "@protomaps/basemaps";
 import { resolveTilesUrl, toBuildingExtrusion } from "@/lib/map-style";
+import VehicleLayer from "./VehicleLayer";
 import "maplibre-gl/dist/maplibre-gl.css";
 
 // maplibre-gl locates its own tile-parsing worker relative to its internal
@@ -81,6 +82,8 @@ export default function Map({ ref }: { ref?: Ref<MapRef> }) {
         window.__mapLoaded = true;
         window.__map = e.target;
       }}
-    />
+    >
+      <VehicleLayer />
+    </MapLibreMap>
   );
 }
