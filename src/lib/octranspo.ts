@@ -1,10 +1,8 @@
 import type { Feature, FeatureCollection, Point } from "geojson";
 
-// OC Transpo's GTFS-RT Vehicle Positions feed (buses only — see
-// docs/map-tiles.md's sibling doc on transit data, or project memory, for
-// why trains aren't included: OC Transpo doesn't publish realtime O-Train
-// positions at all yet). JSON format, not the protobuf default — see
-// https://nextrip-public-api.developer.azure-api.net/.
+// OC Transpo's GTFS-RT Vehicle Positions feed. Buses only — OC Transpo
+// doesn't publish realtime O-Train positions at all yet. JSON format, not
+// the protobuf default — see https://nextrip-public-api.developer.azure-api.net/.
 const VEHICLE_POSITIONS_URL =
   "https://nextrip-public-api.azure-api.net/octranspo/gtfs-rt-vp/beta/v1/VehiclePositions?format=json";
 

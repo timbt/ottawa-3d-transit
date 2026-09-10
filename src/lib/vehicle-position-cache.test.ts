@@ -2,8 +2,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { getVehiclePositions, pollOnce } from "./vehicle-position-cache";
 import type { VehiclePositionsCollection } from "./octranspo";
 
-// getVehiclePositions()/pollOnce() share module-level state, so each test
-// needs its own known starting point rather than inheriting whatever the
+// getVehiclePositions()/pollOnce() share global state, so each test needs
+// its own known starting point rather than inheriting whatever the
 // previous test left behind.
 async function resetToKnownState(): Promise<void> {
   const empty: VehiclePositionsCollection = { type: "FeatureCollection", features: [] };
