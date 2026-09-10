@@ -44,6 +44,11 @@ export interface VehicleProperties {
 
 export type VehiclePositionsCollection = FeatureCollection<Point, VehicleProperties>;
 
+// What GET /api/vehicle-positions actually returns — see route.ts.
+export interface VehiclePositionsResponse extends VehiclePositionsCollection {
+  updatedAt: number | null;
+}
+
 function isRawResponse(value: unknown): value is RawVehiclePositionsResponse {
   return typeof value === "object" && value !== null && Array.isArray((value as RawVehiclePositionsResponse).Entity);
 }

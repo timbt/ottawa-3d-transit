@@ -1,4 +1,5 @@
 import { getVehiclePositions } from "@/lib/vehicle-position-cache";
+import type { VehiclePositionsResponse } from "@/lib/octranspo";
 
 // Serves whatever's currently in the in-memory cache (see
 // src/lib/vehicle-position-cache.ts) — never calls OC Transpo itself, so
@@ -10,5 +11,6 @@ import { getVehiclePositions } from "@/lib/vehicle-position-cache";
 // still carrying staleness info (null until the first successful poll).
 export async function GET() {
   const { data, updatedAt } = getVehiclePositions();
-  return Response.json({ ...data, updatedAt }, { headers: { "Cache-Control": "no-store" } });
+  const response: VehiclePositionsResponse = { ...data, updatedAt };
+  return Response.json(response, { headers: { "Cache-Control": "no-store" } });
 }
