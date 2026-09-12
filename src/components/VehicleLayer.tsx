@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { Layer, Popup, Source, useMap } from "react-map-gl/maplibre";
-import type { MapLayerMouseEvent } from "maplibre-gl";
+import type { MapMouseEvent } from "maplibre-gl";
 import type { VehiclePositionsCollection, VehiclePositionsResponse } from "@/lib/octranspo";
 import {
   BUS_HEIGHT_METERS,
@@ -63,9 +63,12 @@ export default function VehicleLayer() {
     if (!map) return;
     const mapInstance = map.getMap();
 
-    function handleClick(e: MapLayerMouseEvent) {
-      const feature = e.features?.[0];
-      if (!feature) return;
+    function handleClick(e: MapMouseEvent) {
+      const [feature] = mapInstance.queryRenderedFeatures(e.point, { layers: [BOX_LAYER_ID, DOT_LAYER_ID] });
+      if (!feature) {
+        setSelected(null);
+        return;
+      }
       const { longitude, latitude, routeId } = feature.properties as PositionedVehicleProperties;
       setSelected({ longitude, latitude, routeId });
     }
@@ -78,17 +81,15 @@ export default function VehicleLayer() {
       mapInstance.getCanvas().style.cursor = "";
     }
 
-    // Both layers show the same vehicles at different zoom ranges, so both
-    // get the same click/hover handling.
+    mapInstance.on("click", handleClick);
     for (const layerId of [BOX_LAYER_ID, DOT_LAYER_ID]) {
-      mapInstance.on("click", layerId, handleClick);
       mapInstance.on("mouseenter", layerId, handleMouseEnter);
       mapInstance.on("mouseleave", layerId, handleMouseLeave);
     }
 
     return () => {
+      mapInstance.off("click", handleClick);
       for (const layerId of [BOX_LAYER_ID, DOT_LAYER_ID]) {
-        mapInstance.off("click", layerId, handleClick);
         mapInstance.off("mouseenter", layerId, handleMouseEnter);
         mapInstance.off("mouseleave", layerId, handleMouseLeave);
       }
@@ -123,7 +124,12 @@ export default function VehicleLayer() {
         />
       </Source>
       {selected && (
-        <Popup longitude={selected.longitude} latitude={selected.latitude} onClose={() => setSelected(null)}>
+        <Popup
+          longitude={selected.longitude}
+          latitude={selected.latitude}
+          onClose={() => setSelected(null)}
+          closeOnClick={false}
+        >
           <div className="text-zinc-800">
             <div>Route {selected.routeId ?? "unknown"}</div>
             <div>{updatedAt ? `Updated at ${new Date(updatedAt).toLocaleTimeString()}` : "No data yet"}</div>
