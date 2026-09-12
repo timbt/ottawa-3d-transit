@@ -1,13 +1,25 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Layer, Popup, Source, useMap } from "react-map-gl/maplibre";
 import type { MapLayerMouseEvent } from "maplibre-gl";
-import type { VehiclePositionsCollection, VehiclePositionsResponse, VehicleProperties } from "@/lib/octranspo";
+import type { VehiclePositionsCollection, VehiclePositionsResponse } from "@/lib/octranspo";
+import {
+  BUS_HEIGHT_METERS,
+  toVehicleDots,
+  toVehicleFootprints,
+  type PositionedVehicleProperties,
+} from "@/lib/bus-footprint";
 
 const POLL_INTERVAL_MS = 20_000;
 const EMPTY_COLLECTION: VehiclePositionsCollection = { type: "FeatureCollection", features: [] };
-const LAYER_ID = "vehicles-circles";
+
+// Below this zoom, a realistically-sized bus box is only a few pixels
+// across and reads as noise rather than a bus -- show the old flat dot
+// instead. Above it, show the 3D box. Picked by eye; adjust freely.
+const BOX_MIN_ZOOM = 16;
+const BOX_LAYER_ID = "vehicle-boxes";
+const DOT_LAYER_ID = "vehicle-dots";
 
 interface SelectedVehicle {
   longitude: number;
@@ -20,6 +32,8 @@ export default function VehicleLayer() {
   const [updatedAt, setUpdatedAt] = useState<number | null>(null);
   const [selected, setSelected] = useState<SelectedVehicle | null>(null);
   const { current: map } = useMap();
+  const footprints = useMemo(() => toVehicleFootprints(data), [data]);
+  const dots = useMemo(() => toVehicleDots(data), [data]);
 
   useEffect(() => {
     let cancelled = false;
@@ -51,9 +65,9 @@ export default function VehicleLayer() {
 
     function handleClick(e: MapLayerMouseEvent) {
       const feature = e.features?.[0];
-      if (!feature || feature.geometry.type !== "Point") return;
-      const [longitude, latitude] = feature.geometry.coordinates;
-      setSelected({ longitude, latitude, routeId: (feature.properties as VehicleProperties).routeId });
+      if (!feature) return;
+      const { longitude, latitude, routeId } = feature.properties as PositionedVehicleProperties;
+      setSelected({ longitude, latitude, routeId });
     }
 
     function handleMouseEnter() {
@@ -64,23 +78,42 @@ export default function VehicleLayer() {
       mapInstance.getCanvas().style.cursor = "";
     }
 
-    mapInstance.on("click", LAYER_ID, handleClick);
-    mapInstance.on("mouseenter", LAYER_ID, handleMouseEnter);
-    mapInstance.on("mouseleave", LAYER_ID, handleMouseLeave);
+    // Both layers show the same vehicles at different zoom ranges, so both
+    // get the same click/hover handling.
+    for (const layerId of [BOX_LAYER_ID, DOT_LAYER_ID]) {
+      mapInstance.on("click", layerId, handleClick);
+      mapInstance.on("mouseenter", layerId, handleMouseEnter);
+      mapInstance.on("mouseleave", layerId, handleMouseLeave);
+    }
 
     return () => {
-      mapInstance.off("click", LAYER_ID, handleClick);
-      mapInstance.off("mouseenter", LAYER_ID, handleMouseEnter);
-      mapInstance.off("mouseleave", LAYER_ID, handleMouseLeave);
+      for (const layerId of [BOX_LAYER_ID, DOT_LAYER_ID]) {
+        mapInstance.off("click", layerId, handleClick);
+        mapInstance.off("mouseenter", layerId, handleMouseEnter);
+        mapInstance.off("mouseleave", layerId, handleMouseLeave);
+      }
     };
   }, [map]);
 
   return (
     <>
-      <Source id="vehicles" type="geojson" data={data}>
+      <Source id="vehicle-boxes" type="geojson" data={footprints}>
         <Layer
-          id={LAYER_ID}
+          id={BOX_LAYER_ID}
+          type="fill-extrusion"
+          minzoom={BOX_MIN_ZOOM}
+          paint={{
+            "fill-extrusion-color": "#e63946",
+            "fill-extrusion-height": BUS_HEIGHT_METERS,
+            "fill-extrusion-opacity": 0.9,
+          }}
+        />
+      </Source>
+      <Source id="vehicle-dots" type="geojson" data={dots}>
+        <Layer
+          id={DOT_LAYER_ID}
           type="circle"
+          maxzoom={BOX_MIN_ZOOM}
           paint={{
             "circle-radius": 4,
             "circle-color": "#e63946",
